@@ -84,6 +84,4 @@ source("scripts/08_climate_flowering_figure.R")
 
 Generated figures and tables are written to the `figures/` and `tables/` directories, respectively. These are created by the scripts as necessary. Some scripts use `set.seed(123)` for stochastic analyses.
 
-## Citation and licensing
 
-Please cite the associated article when published and cite the archived repository DOI once assigned (for example through Zenodo). A code/data license has not yet been selected; add the appropriate license(s) before public release.
