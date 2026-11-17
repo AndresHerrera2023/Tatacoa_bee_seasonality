@@ -3,9 +3,10 @@
 # Project: Bee assemblages in a tropical dry forest, La Tatacoa, Colombia
 #          (sampling: February 2018 - January 2019)
 #
-# Purpose: Measure how bee composition changes among months in Forest and Scrubland and split it into turnover and nestedness (Sorensen, incidence) and balanced variation and abundance gradient (Bray-Curtis, abundance).
+# Purpose: Measure how bee composition changes among months in Forest and Scrubland and split it into turnover and nestedness (Sorensen, incidence) and balanced variation and abundance gradient (Bray-Curtis, abundance). Also compare the pooled Forest and Scrubland assemblages.
 # Input:   data/database.csv
-# Output:  figures/baselga/S4_Fig.tif, Fig6.tif, S5_Fig.tif, Fig7.tif
+# Output:  figures/baselga/S4_Fig.tif, Fig6.tif, S5_Fig.tif, Fig7.tif,
+#          figures/baselga/forest_vs_scrubland_dissimilarity.csv
 # ============================================================
 
 # Packages
@@ -671,7 +672,41 @@ ggsave(
 )
 
 
-# 16. View results
+# 16. Forest vs Scrubland (all months pooled)
+# Total abundance of each species in each vegetation type
+forest_total <- colSums(forest_all_t)
+scrub_total  <- colSums(scrub_all_t)
+two_sites <- rbind(Forest = forest_total, Scrubland = scrub_total)
+
+# Sorensen (incidence): total, turnover (sim) and nestedness (sne)
+beta_sites_sor <- beta.pair((two_sites > 0) * 1, index.family = "sorensen")
+
+# Bray-Curtis (abundance): total, balanced variation (bal) and gradient (gra)
+beta_sites_bray <- beta.pair.abund(two_sites, index.family = "bray")
+
+sites_dissimilarity <- data.frame(
+  Index = c("Sorensen", "Sorensen", "Sorensen",
+            "Bray-Curtis", "Bray-Curtis", "Bray-Curtis"),
+  Component = c("Total", "Turnover (SIM)", "Nestedness (SNE)",
+                "Total", "Balanced variation", "Abundance gradient"),
+  Value = round(c(
+    as.numeric(beta_sites_sor$beta.sor),
+    as.numeric(beta_sites_sor$beta.sim),
+    as.numeric(beta_sites_sor$beta.sne),
+    as.numeric(beta_sites_bray$beta.bray),
+    as.numeric(beta_sites_bray$beta.bray.bal),
+    as.numeric(beta_sites_bray$beta.bray.gra)
+  ), 3)
+)
+sites_dissimilarity
+
+write.csv(
+  sites_dissimilarity,
+  file.path(out_dir, "forest_vs_scrubland_dissimilarity.csv"),
+  row.names = FALSE
+)
+
+# 17. View results
 # Sorensen: consecutive months
 forest_all_consec
 forest_non_consec
@@ -695,3 +730,4 @@ heatmaps_sor_3x2
 bars_sor_3x2
 heatmaps_bray_3x2
 bars_bray_3x2
+
